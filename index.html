@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TambolaMaster Pro</title>
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="description" content="Calculate booklet prices and distribute prizes for your Housie/Tambola event!">
+    <link rel="manifest" id="app-manifest">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode section {
+            background-color: #1e1e1e;
+        }
+        .dark-mode nav {
+            background-color: #333333;
+        }
+        .dark-mode button {
+            background-color: #444444;
+            color: #ffffff;
+        }
+        .dark-mode button:hover {
+            background-color: #555555;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        #eventLogo {
+            max-height: 100px;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 20px;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        nav button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #2196F3;
+            color: white;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: background-color 0.3s;
+        }
+        nav button:hover {
+            background-color: #1976D2;
+        }
+        section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        input, button {
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #2196F3;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        .icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        .gain {
+            color: green;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #2196F3;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 400px;
+            transition: background-color 0.3s;
+        }
+        .dark-mode .modal-content {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        .round-toggle {
+            background-color: #FFC107;
+            color: #000;
+            border-radius: 20px;
+            margin: 5px;
+            padding: 10px 20px;
+        }
+        .round-toggle:hover {
+            background-color: #FFB300;
+        }
+        .accept-btn {
+            background-color: #4CAF50;
+        }
+        .accept-btn:hover {
+            background-color: #388E3C;
+        }
+        .reject-btn {
+            background-color: #F44336;
+        }
+        .reject-btn:hover {
+            background-color: #D32F2F;
+        }
+        .export-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .export-btn {
+            background-color: #9C27B0;
+        }
+        .export-btn:hover {
+            background-color: #7B1FA2;
+        }
+        .pwa-install-btn {
+            background-color: #FF9800;
+        }
+        .pwa-install-btn:hover {
+            background-color: #F57C00;
+        }
+        .online-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 100;
+        }
+        .online {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .offline {
+            background-color: #F44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="onlineStatus" class="online-status online" style="display: none;">Online</div>
+    
+    <header>
+        <img id="eventLogo" src="" alt="Event Logo" style="display: none;">
+        <h1>TambolaMaster Pro</h1>
+        <p>Enhanced</p>
+        <p>Calculate booklet prices and distribute prizes for your Housie/Tambola event!</p>
+    </header>
+
+    <nav>
+        <button onclick="toggleDarkMode()">Dark Mode</button>
+        <button onclick="authSection('admin')">Admin</button>
+        <button onclick="showExportOptions()">Export Report</button>
+        <button onclick="resetAll()">Reset</button>
+        <button onclick="authSection('finance')">Finance</button>
+        <button id="installButton" class="pwa-install-btn" style="display: none;">Install App</button>
+    </nav>
+
+    <section id="adminSettings" style="display: none;">
+        <h2>Admin Settings</h2>
+        <div>
+            <label>Upload Event Logo:</label>
+            <input type="file" id="logoUpload" accept="image/*">
+        </div>
+        <div>
+            <h3>Financial Parameters</h3>
+            <label>Caller Fees (₹):</label>
+            <input type="number" id="callerFees" min="0"><br>
+            <label>GST Percentage (%):</label>
+            <input type="number" id="gstPercentage" min="0" max="100">
+        </div>
+        <div>
+            <h3>Game Structure</h3>
+            <label>Number of Regular Rounds:</label>
+            <input type="number" id="regularRounds" min="0" value="8"><br>
+            <label>Number of Bingo Rounds:</label>
+            <input type="number" id="bingoRounds" min="0" value="2"><br>
+            <label>Regular Round Non-House Percentage (%):</label>
+            <input type="number" id="nonHousePercentage" min="0" max="100" value="40"><br>
+            <label>Number of Part Games per Regular Round:</label>
+            <input type="number" id="partGames" min="0" value="2"><br>
+            <label>Number of Sheet Prizes per Regular Round:</label>
+            <input type="number" id="sheetPrizes" min="0" value="2"><br>
+            <label>Number of Houses per Regular Round:</label>
+            <input type="number" id="housesRegular" min="0" value="3"><br>
+            <label>Number of Houses per Bingo Round:</label>
+            <input type="number" id="housesBingo" min="0" value="4">
+        </div>
+        <button onclick="saveSettings()">Save Settings</button>
+    </section>
+
+    <section id="bookletPricing">
+        <h2>Booklet Pricing</h2>
+        <label>Total Prize Money to Distribute (₹):</label>
+        <input type="number" id="totalPrizeMoney" min="0"><br>
+        <button onclick="calculateSuggestedPrice()">Calculate Suggested Price</button>
+        <div>
+            <label>Suggested Booklet Price (₹):</label>
+            <input type="number" id="suggestedBookletPrice" readonly><br>
+            <label>Suggested Number of Booklets:</label>
+            <input type="number" id="suggestedBooklets" readonly>
+        </div>
+        <label>Actual Booklet Price (₹):</label>
+        <input type="number" id="actualBookletPrice" min="0"><br>
+        <label>Actual Booklets Sold:</label>
+        <input type="number" id="actualBookletsSold" min="0"><br>
+        <button class="accept-btn" onclick="acceptSuggestedPrice()">Accept Suggested Price</button>
+        <button class="reject-btn" onclick="rejectSuggestedPrice()">Reject Suggested Price</button>
+        <button onclick="autoPopulateRounds()">Auto-Populate All Rounds</button>
+    </section>
+
+    <section id="regularRoundDistribution">
+        <h2>Regular Round Prize Distribution</h2>
+        <div id="regularRoundsContainer"></div>
+    </section>
+
+    <section id="bingoRoundDistribution">
+        <h2>Bingo Prize Distribution</h2>
+        <div id="bingoRoundsContainer"></div>
+    </section>
+
+    <section id="financialSummary" style="display: none;">
+        <h2>Financial Summary</h2>
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <span class="icon">💰</span>
+                <strong>Revenue Collected</strong><br>
+                ₹<span id="revenueCollected">0</span><br>
+                Actual Booklets Sold: <span id="actualBooklets">0</span>
+            </div>
+            <div>
+                <span class="icon">💸</span>
+                <strong>Total Distributed</strong><br>
+                ₹<span id="totalDistributed">0</span><br>
+                Total Prize Money
+            </div>
+            <div>
+                <span class="icon">💲</span>
+                <strong>Booklet Price</strong><br>
+                ₹<span id="bookletPrice">0</span> (Target: ₹<span id="targetBookletPrice">0</span>)
+            </div>
+            <div>
+                <span class="icon">📚</span>
+                <strong>Booklets</strong><br>
+                Actual: <span id="actualBookletsCount">0</span><br>
+                Target: <span id="targetBooklets">0</span>
+            </div>
+        </div>
+        <table>
+            <tr>
+                <th>Description</th><th>Amount</th><th>Description</th><th>Amount</th>
+            </tr>
+            <tr>
+                <td>Number of Regular Rounds</td><td id="numRegularRounds">8</td>
+                <td>Total Regular Rounds Prizes (₹)</td><td id="totalRegularPrizes">0</td>
+            </tr>
+            <tr>
+                <td>Number of Bingo Rounds</td><td id="numBingoRounds">2</td>
+                <td>Total Bingo Rounds Prizes (₹)</td><td id="totalBingoPrizes">0</td>
+            </tr>
+            <tr>
+                <td>Caller Fees (₹)</td><td id="callerFeesDisplay">0</td>
+                <td>Total Gain/Loss for Regular Rounds (₹)</td><td id="regularGainLoss">0</td>
+            </tr>
+            <tr>
+                <td>GST Percentage (%)</td><td id="gstPercentageDisplay">0</td>
+                <td>Total Gain/Loss for Bingo Rounds (₹)</td><td id="bingoGainLoss">0</td>
+            </tr>
+            <tr>
+                <td>GST Amount (₹)</td><td id="gstAmount">0</td>
+                <td>Decided Prize Money (₹)</td><td id="decidedPrizeMoney">0</td>
+            </tr>
+            <tr>
+                <td>Expected Revenue (Target) (₹)</td><td id="expectedRevenue">0</td>
+                <td>Actual Revenue (₹)</td><td id="actualRevenue">0</td>
+            </tr>
+        </table>
+    </section>
+
+    <div id="overrideModal" class="modal">
+        <div class="modal-content">
+            <h2 id="overrideTitle">Override Amount</h2>
+            <p id="overrideMessage">Please key in the override amount.</p>
+            <input type="number" id="overrideAmount" min="0">
+            <button onclick="submitOverride()">Submit</button>
+        </div>
+    </div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h2>Enter Password</h2>
+            <p>Please enter the password to access this section.</p>
+            <input type="password" id="passwordInput">
+            <button onclick="submitPassword()">Submit</button>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h2>Export Report</h2>
+            <p>Select export format:</p>
+            <div class="export-options">
+                <button class="export-btn" onclick="exportAsHTML()">HTML Report</button>
+                <button class="export-btn" onclick="exportAsText()">Text File</button>
+            </div>
+            <button onclick="closeModal('exportModal')">Cancel</button>
+        </div>
+    </div>
+
+    <div id="welcomeModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <h2>Welcome to TambolaMaster Pro!</h2>
+            <div>
+                <p>How to use this tool:</p>
+                <ul>
+                    <li>Admin Settings - Configure your event parameters first</li>
+                    <li>Booklet Pricing - Set up your booklet pricing strategy</li>
+                    <li>Round Prize Distribution - Distribute prizes across rounds</li>
+                    <li>Financial Summary - Review your financial overview</li>
+                </ul>
+                <p>Important: Both Admin and Finance sections are protected with a password.</p>
+                <p>This app works offline! You can install it on your device.</p>
+            </div>
+            <button onclick="closeModal('welcomeModal')">Got It!</button>
+        </div>
+    </div>
+
+    <script>
+        // PWA Manifest
+        const manifest = {
+            "name": "TambolaMaster Pro",
+            "short_name": "TambolaPro",
+            "description": "Calculate booklet prices and distribute prizes for your Housie/Tambola event!",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#4CAF50",
+            "icons": [
+                {
+                    "src": "./icon.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "./icon-512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ],
+            "categories": ["business", "productivity"]
+        };
+        
+        // Create and set manifest
+        const manifestJson = JSON.stringify(manifest);
+        const manifestBlob = new Blob([manifestJson], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('app-manifest').setAttribute('href', manifestURL);
+        
+        // App data and state
+        let regularRounds = 8;
+        let bingoRounds = 2;
+        let totalPrizeMoney = 0;
+        let suggestedBookletPrice = 0;
+        let suggestedBooklets = 0;
+        let actualBookletPrice = 0;
+        let actualBookletsSold = 0;
+        let callerFees = 0;
+        let gstPercentage = 0;
+        let currentAuth = '';
+        let currentOverride = { type: '', inputId: '', suggested: 0, diffId: '', statusId: '', roundId: '' };
+        let deferredPrompt;
+
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installButton').style.display = 'block';
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('installButton').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Online/Offline detection
+        window.addEventListener('online', () => {
+            document.getElementById('onlineStatus').textContent = 'Online';
+            document.getElementById('onlineStatus').className = 'online-status online';
+            setTimeout(() => {
+                document.getElementById('onlineStatus').style.display = 'none';
+            }, 3000);
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('onlineStatus').textContent = 'Offline';
+            document.getElementById('onlineStatus').className = 'online-status offline';
+            document.getElementById('onlineStatus').style.display = 'block';
+        });
+
+        // Check initial online status
+        if (!navigator.onLine) {
+            document.getElementById('onlineStatus').textContent = 'Offline';
+            document.getElementById('onlineStatus').className = 'online-status offline';
+            document.getElementById('onlineStatus').style.display = 'block';
+        }
+
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    console.log('SW registered: ', registration);
+                }).catch((registrationError) => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        // Rest of your application code (same as before)
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const logo = document.getElementById('eventLogo');
+                    logo.src = ev.target.result;
+                    logo.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showExportOptions() {
+            openModal('exportModal');
+        }
+
+        function authSection(section) {
+            currentAuth = section;
+            openModal('passwordModal');
+        }
+
+        function submitPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === 'tambola123') {
+                closeModal('passwordModal');
+                if (currentAuth === 'admin') {
+                    document.getElementById('adminSettings').style.display = 'block';
+                } else if (currentAuth === 'finance') {
+                    document.getElementById('financialSummary').style.display = 'block';
+                }
+            } else {
+                alert('Incorrect password');
+            }
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function saveSettings() {
+            regularRounds = parseInt(document.getElementById('regularRounds').value) || 8;
+            bingoRounds = parseInt(document.getElementById('bingoRounds').value) || 2;
+            callerFees = parseInt(document.getElementById('callerFees').value) || 0;
+            gstPercentage = parseInt(document.getElementById('gstPercentage').value) || 0;
+            document.getElementById('adminSettings').style.display = 'none';
+            updateFinancialSummary();
+            renderRounds();
+        }
+
+        function calculateSuggestedPrice() {
+            totalPrizeMoney = parseInt(document.getElementById('totalPrizeMoney').value) || 0;
+            suggestedBookletPrice = Math.round(0.00536 * totalPrizeMoney + 373);
+            suggestedBooklets = Math.ceil(totalPrizeMoney / suggestedBookletPrice);
+            document.getElementById('suggestedBookletPrice').value = suggestedBookletPrice;
+            document.getElementById('suggestedBooklets').value = suggestedBooklets;
+            updateFinancialSummary();
+        }
+
+        function acceptSuggestedPrice() {
+            actualBookletPrice = suggestedBookletPrice;
+            document.getElementById('actualBookletPrice').value = actualBookletPrice;
+            updateFinancialSummary();
+        }
+
+        function rejectSuggestedPrice() {
+            currentOverride = { type: 'booklet', inputId: 'actualBookletPrice', suggested: suggestedBookletPrice, diffId: '', statusId: '', roundId: '' };
+            document.getElementById('overrideTitle').textContent = 'Override Booklet Price';
+            document.getElementById('overrideMessage').textContent = 'Please key in the override amount for the booklet price.';
+            openModal('overrideModal');
+        }
+
+        function submitOverride() {
+            const overrideVal = parseInt(document.getElementById('overrideAmount').value) || 0;
+            if (currentOverride.type === 'booklet') {
+                actualBookletPrice = overrideVal;
+                document.getElementById(currentOverride.inputId).value = overrideVal;
+            } else {
+                const input = document.getElementById(currentOverride.inputId);
+                input.value = overrideVal;
+                calculateDifference(input, currentOverride.suggested, currentOverride.diffId, currentOverride.statusId, currentOverride.roundId);
+            }
+            closeModal('overrideModal');
+            updateFinancialSummary();
+        }
+
+        function autoPopulateRounds() {
+            actualBookletsSold = parseInt(document.getElementById('actualBookletsSold').value) || 0;
+            renderRounds();
+            updateFinancialSummary();
+        }
+
+        function renderRounds() {
+            const regularContainer = document.getElementById('regularRoundsContainer');
+            regularContainer.innerHTML = '';
+            const regularRoundPrize = Math.floor(totalPrizeMoney * 0.8 / regularRounds);
+            for (let i = 1; i <= regularRounds; i++) {
+                const roundDiv = document.createElement('div');
+                const partGamePrize = Math.floor(regularRoundPrize * 0.1);
+                const sheetPrize = Math.floor(regularRoundPrize * 0.1);
+                const house1Prize = Math.floor(regularRoundPrize * 0.3);
+                const house2Prize = Math.floor(regularRoundPrize * 0.18);
+                const house3Prize = Math.floor(regularRoundPrize * 0.12);
+                const totalRoundPrize = (partGamePrize * 2) + (sheetPrize * 2) + house1Prize + house2Prize + house3Prize;
+                roundDiv.innerHTML = `
+                    <button id="regularButton${i}" class="round-toggle" data-suggested-amount="${totalRoundPrize}" onclick="toggleRound('regular${i}')">Regular Round ${i} (Available Amount For Distribution: ₹${totalRoundPrize} | Actual Amount Distributed: ₹${totalRoundPrize})</button>
+                    <div id="regular${i}" style="display: none;">
+                        <table>
+                            <tr><th>Prize</th><th>Suggested (₹)</th><th>Actual (₹)</th><th>Difference (₹)</th><th>Status</th><th>Actions</th></tr>
+                            ${createPrizeRow('Part Game 1', partGamePrize, `regular${i}_part1`, `regular${i}`)}
+                            ${createPrizeRow('Part Game 2', partGamePrize, `regular${i}_part2`, `regular${i}`)}
+                            ${createPrizeRow('Sheet Prize 1', sheetPrize, `regular${i}_sheet1`, `regular${i}`)}
+                            ${createPrizeRow('Sheet Prize 2', sheetPrize, `regular${i}_sheet2`, `regular${i}`)}
+                            ${createPrizeRow('House 1', house1Prize, `regular${i}_house1`, `regular${i}`)}
+                            ${createPrizeRow('House 2', house2Prize, `regular${i}_house2`, `regular${i}`)}
+                            ${createPrizeRow('House 3', house3Prize, `regular${i}_house3`, `regular${i}`)}
+                        </table>
+                    </div>
+                `;
+                regularContainer.appendChild(roundDiv);
+            }
+
+            const bingoContainer = document.getElementById('bingoRoundsContainer');
+            bingoContainer.innerHTML = '';
+            const bingoRoundPrize = Math.floor(totalPrizeMoney * 0.2 / bingoRounds);
+            for (let i = 1; i <= bingoRounds; i++) {
+                const roundDiv = document.createElement('div');
+                const house1Prize = Math.floor(bingoRoundPrize * 0.4);
+                const house2Prize = Math.floor(bingoRoundPrize * 0.3);
+                const house3Prize = Math.floor(bingoRoundPrize * 0.2);
+                const house4Prize = Math.floor(bingoRoundPrize * 0.1);
+                const totalRoundPrize = house1Prize + house2Prize + house3Prize + house4Prize;
+                roundDiv.innerHTML = `
+                    <button id="bingoButton${i}" class="round-toggle" data-suggested-amount="${totalRoundPrize}" onclick="toggleRound('bingo${i}')">Bingo Round ${i} (Available Amount For Distribution: ₹${totalRoundPrize} | Actual Amount Distributed: ₹${totalRoundPrize})</button>
+                    <div id="bingo${i}" style="display: none;">
+                        <table>
+                            <tr><th>Prize</th><th>Suggested (₹)</th><th>Actual (₹)</th><th>Difference (₹)</th><th>Status</th><th>Actions</th></tr>
+                            ${createPrizeRow('House 1', house1Prize, `bingo${i}_house1`, `bingo${i}`)}
+                            ${createPrizeRow('House 2', house2Prize, `bingo${i}_house2`, `bingo${i}`)}
+                            ${createPrizeRow('House 3', house3Prize, `bingo${i}_house3`, `bingo${i}`)}
+                            ${createPrizeRow('House 4', house4Prize, `bingo${i}_house4`, `bingo${i}`)}
+                        </table>
+                    </div>
+                `;
+                bingoContainer.appendChild(roundDiv);
+            }
+        }
+
+        function createPrizeRow(name, suggested, id, roundId) {
+            return `
+                <tr>
+                    <td>${name}</td>
+                    <td>${suggested}</td>
+                    <td><input id="${id}_actual" type="number" value="${suggested}" onchange="calculateDifference(this, ${suggested}, '${id}_diff', '${id}_status', '${roundId}')"></td>
+                    <td id="${id}_diff">0</td>
+                    <td id="${id}_status"></td>
+                    <td>
+                        <button class="accept-btn" onclick="acceptPrize('${id}_actual', ${suggested}, '${id}_diff', '${id}_status', '${roundId}')">Accept</button>
+                        <button class="reject-btn" onclick="rejectPrize('${id}_actual', ${suggested}, '${id}_diff', '${id}_status', '${roundId}')">Reject</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function acceptPrize(inputId, suggested, diffId, statusId, roundId) {
+            const input = document.getElementById(inputId);
+            input.value = suggested;
+            calculateDifference(input, suggested, diffId, statusId, roundId);
+        }
+
+        function rejectPrize(inputId, suggested, diffId, statusId, roundId) {
+            currentOverride = { type: 'prize', inputId: inputId, suggested: suggested, diffId: diffId, statusId: statusId, roundId: roundId };
+            document.getElementById('overrideTitle').textContent = 'Override Prize Amount';
+            document.getElementById('overrideMessage').textContent = 'Please key in the override amount for this prize.';
+            openModal('overrideModal');
+        }
+
+        function toggleRound(roundId) {
+            const roundDiv = document.getElementById(roundId);
+            roundDiv.style.display = roundDiv.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function calculateDifference(input, suggested, diffId, statusId, roundId) {
+            const actual = parseInt(input.value) || 0;
+            const difference = suggested - actual;
+            const diffElement = document.getElementById(diffId);
+            diffElement.textContent = difference;
+            const statusElement = document.getElementById(statusId);
+            if (difference > 0) {
+                diffElement.className = 'gain';
+                statusElement.textContent = 'Gain';
+                statusElement.className = 'gain';
+            } else if (difference < 0) {
+                diffElement.className = 'loss';
+                statusElement.textContent = 'Loss';
+                statusElement.className = 'loss';
+            } else {
+                diffElement.className = '';
+                statusElement.textContent = '';
+                statusElement.className = '';
+            }
+            updateRoundActual(roundId);
+            updateFinancialSummary();
+        }
+
+        function updateRoundActual(roundId) {
+            const container = document.getElementById(roundId);
+            const inputs = container.querySelectorAll('input[type="number"]');
+            let totalActual = 0;
+            inputs.forEach(inp => {
+                totalActual += parseInt(inp.value) || 0;
+            });
+            const prefix = roundId.startsWith('regular') ? 'regular' : 'bingo';
+            const num = roundId.match(/\d+$/)[0];
+            const button = document.getElementById(`${prefix}Button${num}`);
+            const suggested = button.getAttribute('data-suggested-amount');
+            const roundType = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+            button.innerText = `${roundType} Round ${num} (Available Amount For Distribution: ₹${suggested} | Actual Amount Distributed: ₹${totalActual})`;
+        }
+
+        function getTotalActualPrizes(prefix, rounds) {
+            let total = 0;
+            for (let i = 1; i <= rounds; i++) {
+                const container = document.getElementById(`${prefix}${i}`);
+                if (container) {
+                    const inputs = container.querySelectorAll('input[type="number"]');
+                    inputs.forEach(inp => {
+                        total += parseInt(inp.value) || 0;
+                    });
+                }
+            }
+            return total;
+        }
+
+        function getTotalDifference(prefix, rounds) {
+            let total = 0;
+            for (let i = 1; i <= rounds; i++) {
+                const container = document.getElementById(`${prefix}${i}`);
+                if (container) {
+                    const diffs = container.querySelectorAll('td[id$="_diff"]');
+                    diffs.forEach(diff => {
+                        total += parseInt(diff.textContent) || 0;
+                    });
+                }
+            }
+            return total;
+        }
+
+        function updateFinancialSummary() {
+            const actualRevenue = actualBookletPrice * actualBookletsSold;
+            const totalRegularPrizes = getTotalActualPrizes('regular', regularRounds);
+            const totalBingoPrizes = getTotalActualPrizes('bingo', bingoRounds);
+            const gstAmount = Math.floor(actualRevenue * gstPercentage / 100);
+            const regularGainLoss = getTotalDifference('regular', regularRounds);
+            const bingoGainLoss = getTotalDifference('bingo', bingoRounds);
+            const expectedRevenue = suggestedBookletPrice * suggestedBooklets;
+
+            document.getElementById('revenueCollected').textContent = actualRevenue;
+            document.getElementById('actualBooklets').textContent = actualBookletsSold;
+            document.getElementById('totalDistributed').textContent = totalPrizeMoney;
+            document.getElementById('bookletPrice').textContent = actualBookletPrice;
+            document.getElementById('targetBookletPrice').textContent = suggestedBookletPrice;
+            document.getElementById('actualBookletsCount').textContent = actualBookletsSold;
+            document.getElementById('targetBooklets').textContent = suggestedBooklets;
+            document.getElementById('numRegularRounds').textContent = regularRounds;
+            document.getElementById('numBingoRounds').textContent = bingoRounds;
+            document.getElementById('totalRegularPrizes').textContent = totalRegularPrizes;
+            document.getElementById('totalBingoPrizes').textContent = totalBingoPrizes;
+            document.getElementById('callerFeesDisplay').textContent = callerFees;
+            document.getElementById('gstPercentageDisplay').textContent = gstPercentage;
+            document.getElementById('gstAmount').textContent = gstAmount;
+            document.getElementById('regularGainLoss').textContent = regularGainLoss;
+            document.getElementById('regularGainLoss').className = regularGainLoss >= 0 ? 'gain' : 'loss';
+            document.getElementById('bingoGainLoss').textContent = bingoGainLoss;
+            document.getElementById('bingoGainLoss').className = bingoGainLoss >= 0 ? 'gain' : 'loss';
+            document.getElementById('decidedPrizeMoney').textContent = totalPrizeMoney;
+            document.getElementById('expectedRevenue').textContent = expectedRevenue;
+            document.getElementById('actualRevenue').textContent = actualRevenue;
+        }
+
+        function exportAsHTML() {
+            // Create HTML content for the report
+            let htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <title>TambolaMaster Pro Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #4CAF50; text-align: center; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #2196F3; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #2196F3; color: white; }
+        .gain { color: green; font-weight: bold; }
+        .loss { color: red; font-weight: bold; }
+        .summary-box { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .summary-item { background-color: #f4f4f9; padding: 15px; border-radius: 10px; width: 23%; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>TambolaMaster Pro Report</h1>
+    <p>Generated on: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}</p>
+    
+    <h2>Financial Summary</h2>
+    <div class="summary-box">
+        <div class="summary-item">
+            <strong>Revenue Collected</strong><br>
+            ₹${document.getElementById('revenueCollected').textContent}<br>
+            Booklets Sold: ${document.getElementById('actualBooklets').textContent}
+        </div>
+        <div class="summary-item">
+            <strong>Total Distributed</strong><br>
+            ₹${document.getElementById('totalDistributed').textContent}<br>
+            Total Prize Money
+        </div>
+        <div class="summary-item">
+            <strong>Booklet Price</strong><br>
+            ₹${document.getElementById('bookletPrice').textContent}<br>
+            (Target: ₹${document.getElementById('targetBookletPrice').textContent})
+        </div>
+        <div class="summary-item">
+            <strong>Booklets</strong><br>
+            Actual: ${document.getElementById('actualBookletsCount').textContent}<br>
+            Target: ${document.getElementById('targetBooklets').textContent}
+        </div>
+    </div>
+    
+    <table>
+        <tr>
+            <th>Description</th><th>Amount</th><th>Description</th><th>Amount</th>
+        </tr>
+        <tr>
+            <td>Number of Regular Rounds</td><td>${document.getElementById('numRegularRounds').textContent}</td>
+            <td>Total Regular Rounds Prizes (₹)</td><td>${document.getElementById('totalRegularPrizes').textContent}</td>
+        </tr>
+        <tr>
+            <td>Number of Bingo Rounds</td><td>${document.getElementById('numBingoRounds').textContent}</td>
+            <td>Total Bingo Rounds Prizes (₹)</td><td>${document.getElementById('totalBingoPrizes').textContent}</td>
+        </tr>
+        <tr>
+            <td>Caller Fees (₹)</td><td>${document.getElementById('callerFeesDisplay').textContent}</td>
+            <td>Total Gain/Loss for Regular Rounds (₹)</td><td class="${document.getElementById('regularGainLoss').className}">${document.getElementById('regularGainLoss').textContent}</td>
+        </tr>
+        <tr>
+            <td>GST Percentage (%)</td><td>${document.getElementById('gstPercentageDisplay').textContent}</td>
+            <td>Total Gain/Loss for Bingo Rounds (₹)</td><td class="${document.getElementById('bingoGainLoss').className}">${document.getElementById('bingoGainLoss').textContent}</td>
+        </tr>
+        <tr>
+            <td>GST Amount (₹)</td><td>${document.getElementById('gstAmount').textContent}</td>
+            <td>Decided Prize Money (₹)</td><td>${document.getElementById('decidedPrizeMoney').textContent}</td>
+        </tr>
+        <tr>
+            <td>Expected Revenue (Target) (₹)</td><td>${document.getElementById('expectedRevenue').textContent}</td>
+            <td>Actual Revenue (₹)</td><td>${document.getElementById('actualRevenue').textContent}</td>
+        </tr>
+    </table>`;
+    
+            // Add regular rounds data
+            for (let i = 1; i <= regularRounds; i++) {
+                const roundDiv = document.getElementById(`regular${i}`);
+                if (!roundDiv) continue;
+                
+                htmlContent += `<h2>Regular Round ${i}</h2><table>
+                <tr><th>Prize</th><th>Suggested (₹)</th><th>Actual (₹)</th><th>Difference (₹)</th><th>Status</th></tr>`;
+                
+                const rows = roundDiv.querySelectorAll('tr');
+                for (let j = 1; j < rows.length; j++) {
+                    const cells = rows[j].querySelectorAll('td');
+                    htmlContent += `<tr>
+                        <td>${cells[0].textContent}</td>
+                        <td>${cells[1].textContent}</td>
+                        <td>${cells[2].querySelector('input').value}</td>
+                        <td class="${cells[3].className}">${cells[3].textContent}</td>
+                        <td class="${cells[4].className}">${cells[4].textContent}</td>
+                    </tr>`;
+                }
+                
+                htmlContent += `</table>`;
+            }
+            
+            // Add bingo rounds data
+            for (let i = 1; i <= bingoRounds; i++) {
+                const roundDiv = document.getElementById(`bingo${i}`);
+                if (!roundDiv) continue;
+                
+                htmlContent += `<h2>Bingo Round ${i}</h2><table>
+                <tr><th>Prize</th><th>Suggested (₹)</th><th>Actual (₹)</th><th>Difference (₹)</th><th>Status</th></tr>`;
+                
+                const rows = roundDiv.querySelectorAll('tr');
+                for (let j = 1; j < rows.length; j++) {
+                    const cells = rows[j].querySelectorAll('td');
+                    htmlContent += `<tr>
+                        <td>${cells[0].textContent}</td>
+                        <td>${cells[1].textContent}</td>
+                        <td>${cells[2].querySelector('input').value}</td>
+                        <td class="${cells[3].className}">${cells[3].textContent}</td>
+                        <td class="${cells[4].className}">${cells[4].textContent}</td>
+                    </tr>`;
+                }
+                
+                htmlContent += `</table>`;
+            }
+            
+            htmlContent += `</body></html>`;
+            
+            // Create and download the HTML file
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'TambolaMaster_Report.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            closeModal('exportModal');
+        }
+
+        function exportAsText() {
+            // Create text content for the report
+            let textContent = `TambolaMaster Pro Report\n`;
+            textContent += `Generated on: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}\n\n`;
+            
+            textContent += `FINANCIAL SUMMARY\n`;
+            textContent += `================\n\n`;
+            
+            textContent += `Revenue Collected: ₹${document.getElementById('revenueCollected').textContent}\n`;
+            textContent += `Actual Booklets Sold: ${document.getElementById('actualBooklets').textContent}\n`;
+            textContent += `Total Distributed: ₹${document.getElementById('totalDistributed').textContent}\n`;
+            textContent += `Booklet Price: ₹${document.getElementById('bookletPrice').textContent} (Target: ₹${document.getElementById('targetBookletPrice').textContent})\n`;
+            textContent += `Booklets - Actual: ${document.getElementById('actualBookletsCount').textContent}, Target: ${document.getElementById('targetBooklets').textContent}\n\n`;
+            
+            textContent += `DETAILED FINANCIALS\n`;
+            textContent += `Number of Regular Rounds: ${document.getElementById('numRegularRounds').textContent}\n`;
+            textContent += `Total Regular Rounds Prizes: ₹${document.getElementById('totalRegularPrizes').textContent}\n`;
+            textContent += `Number of Bingo Rounds: ${document.getElementById('numBingoRounds').textContent}\n`;
+            textContent += `Total Bingo Rounds Prizes: ₹${document.getElementById('totalBingoPrizes').textContent}\n`;
+            textContent += `Caller Fees: ₹${document.getElementById('callerFeesDisplay').textContent}\n`;
+            textContent += `Total Gain/Loss for Regular Rounds: ₹${document.getElementById('regularGainLoss').textContent}\n`;
+            textContent += `GST Percentage: ${document.getElementById('gstPercentageDisplay').textContent}%\n`;
+            textContent += `Total Gain/Loss for Bingo Rounds: ₹${document.getElementById('bingoGainLoss').textContent}\n`;
+            textContent += `GST Amount: ₹${document.getElementById('gstAmount').textContent}\n`;
+            textContent += `Decided Prize Money: ₹${document.getElementById('decidedPrizeMoney').textContent}\n`;
+            textContent += `Expected Revenue (Target): ₹${document.getElementById('expectedRevenue').textContent}\n`;
+            textContent += `Actual Revenue: ₹${document.getElementById('actualRevenue').textContent}\n\n`;
+            
+            textContent += `REGULAR ROUNDS PRIZE DISTRIBUTION\n`;
+            textContent += `=================================\n\n`;
+            
+            // Add regular rounds data
+            for (let i = 1; i <= regularRounds; i++) {
+                const roundDiv = document.getElementById(`regular${i}`);
+                if (!roundDiv) continue;
+                
+                textContent += `Regular Round ${i}:\n`;
+                textContent += `Prize\t\tSuggested\tActual\tDifference\tStatus\n`;
+                textContent += `-----\t\t---------\t------\t---------\t------\n`;
+                
+                const rows = roundDiv.querySelectorAll('tr');
+                for (let j = 1; j < rows.length; j++) {
+                    const cells = rows[j].querySelectorAll('td');
+                    const prizeName = cells[0].textContent.padEnd(15);
+                    const suggested = cells[1].textContent.padEnd(10);
+                    const actual = cells[2].querySelector('input').value.padEnd(8);
+                    const difference = cells[3].textContent.padEnd(10);
+                    const status = cells[4].textContent;
+                    
+                    textContent += `${prizeName}\t${suggested}\t${actual}\t${difference}\t${status}\n`;
+                }
+                textContent += `\n`;
+            }
+            
+            textContent += `BINGO ROUNDS PRIZE DISTRIBUTION\n`;
+            textContent += `===============================\n\n`;
+            
+            // Add bingo rounds data
+            for (let i = 1; i <= bingoRounds; i++) {
+                const roundDiv = document.getElementById(`bingo${i}`);
+                if (!roundDiv) continue;
+                
+                textContent += `Bingo Round ${i}:\n`;
+                textContent += `Prize\t\tSuggested\tActual\tDifference\tStatus\n`;
+                textContent += `-----\t\t---------\t------\t---------\t------\n`;
+                
+                const rows = roundDiv.querySelectorAll('tr');
+                for (let j = 1; j < rows.length; j++) {
+                    const cells = rows[j].querySelectorAll('td');
+                    const prizeName = cells[0].textContent.padEnd(15);
+                    const suggested = cells[1].textContent.padEnd(10);
+                    const actual = cells[2].querySelector('input').value.padEnd(8);
+                    const difference = cells[3].textContent.padEnd(10);
+                    const status = cells[4].textContent;
+                    
+                    textContent += `${prizeName}\t${suggested}\t${actual}\t${difference}\t${status}\n`;
+                }
+                textContent += `\n`;
+            }
+            
+            // Create and download the text file
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'TambolaMaster_Report.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            closeModal('exportModal');
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+                document.getElementById('totalPrizeMoney').value = '';
+                document.getElementById('actualBookletPrice').value = '';
+                document.getElementById('actualBookletsSold').value = '';
+                document.getElementById('suggestedBookletPrice').value = '';
+                document.getElementById('suggestedBooklets').value = '';
+                document.getElementById('regularRoundsContainer').innerHTML = '';
+                document.getElementById('bingoRoundsContainer').innerHTML = '';
+                document.getElementById('financialSummary').style.display = 'none';
+                document.getElementById('adminSettings').style.display = 'none';
+                updateFinancialSummary();
+            }
+        }
+
+        // Initialize the app
+        renderRounds();
+    </script>
+</body>
+</html>
